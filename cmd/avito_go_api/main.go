@@ -2,23 +2,24 @@ package main
 
 import (
 	"avito_go_api/cmd/internal/config"
+	mwLogger "avito_go_api/cmd/internal/http-server/middleware/logger"
 	"avito_go_api/cmd/internal/lib/logger/sl"
 	"avito_go_api/cmd/internal/storage/postgresql"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"os"
 )
 
 func main() {
-	// TODO: init config: cleanenv
+
 	cfg := config.MustLoad()
 	//fmt.Println(cfg)
 
-	// TODO: init logger: slog
 	log := setupLogger(cfg.Env)
 	log.Info("Starting...", slog.String("env", cfg.Env))
 	log.Debug("DEBUGGING@!!!")
 
-	// TODO: init storage: postgresql
 	storage, err := postgresql.New(cfg.StoragePath)
 	if err != nil {
 		log.Error("failed to init storage", sl.Err(err))
@@ -57,6 +58,12 @@ func main() {
 	//fmt.Print(segments)
 	// TODO: init router: chi, chi render
 
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	//router.Use(middleware.Logger)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 	// TODO: run server
 }
 
