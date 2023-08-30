@@ -2,12 +2,17 @@ package main
 
 import (
 	"avito_go_api/cmd/internal/config"
+	"avito_go_api/cmd/internal/http-server/handlers/add_segment"
+	"avito_go_api/cmd/internal/http-server/handlers/delete_segment"
+	"avito_go_api/cmd/internal/http-server/handlers/get_segments"
+	"avito_go_api/cmd/internal/http-server/handlers/reassign_segments"
 	mwLogger "avito_go_api/cmd/internal/http-server/middleware/logger"
 	"avito_go_api/cmd/internal/lib/logger/sl"
 	"avito_go_api/cmd/internal/storage/postgresql"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
+	"net/http"
 	"os"
 )
 
@@ -64,7 +69,25 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
+	router.Post("/url", add_segment.New(log, storage))
+	router.Delete("/url", delete_segment.New(log, storage))
+	router.Put("/url", reassign_segments.New(log, storage))
+	router.Get("/url", get_segments.New(log, storage))
 	// TODO: run server
+	log.Info("starting server", slog.String("address", cfg.Address))
+	srv := &http.Server{
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+
+	log.Error("server stopped")
 }
 
 const (
