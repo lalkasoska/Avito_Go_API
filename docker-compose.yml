@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    env_file:
+      - local.env
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+    command: go run cmd/avito_go_api/main.go -b 0.0.0.0
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_USERPASSWORD}
+    ports:
+      - "5432:5432"  # You can change the host port if needed.
+    volumes:
+      - db_data:/var/lib/postgresql/data
+volumes:
+  db_data:

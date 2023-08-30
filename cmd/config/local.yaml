@@ -1,5 +1,5 @@
 env: "local" # local, dev, prod
-storage_path: "postgres://myuser:password123@localhost:5432/myapp?sslmode=disable"
+storage_path: "postgres://myuser:password123@localhost:5432/myapp?sslmode=disable"# localhost, db
 http_server:
   address: "localhost:8080"
   timeout: 4s
