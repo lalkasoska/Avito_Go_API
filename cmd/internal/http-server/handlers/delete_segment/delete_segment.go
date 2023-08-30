@@ -34,6 +34,11 @@ func New(log *slog.Logger, segmentDeleter SegmentDeleter) http.HandlerFunc {
 		}
 
 		log.Info("request body decoded", slog.Any("request", req))
+		if req.Name == "" {
+			log.Error("segment name cannot be empty", slog.String("name", req.Name))
+			render.JSON(w, r, response.Error("segment name cannot be empty"))
+			return
+		}
 		err = segmentDeleter.DeleteSegment(req.Name)
 		if err != nil {
 			log.Error("failed to delete segment", sl.Err(err))

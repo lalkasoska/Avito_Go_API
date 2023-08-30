@@ -36,6 +36,11 @@ func New(log *slog.Logger, segmentCreator SegmentCreator) http.HandlerFunc {
 		}
 
 		log.Info("request body decoded", slog.Any("request", req))
+		if req.Name == "" {
+			log.Error("segment name cannot be empty", slog.String("name", req.Name))
+			render.JSON(w, r, response.Error("segment name cannot be empty"))
+			return
+		}
 		err = segmentCreator.CreateSegment(req.Name)
 		if errors.Is(err, storage.ErrSegmentExists) {
 			log.Info("segment already exists", slog.String("name", req.Name))

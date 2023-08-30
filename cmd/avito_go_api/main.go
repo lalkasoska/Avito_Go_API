@@ -69,10 +69,10 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
-	router.Post("/url", add_segment.New(log, storage))
-	router.Delete("/url", delete_segment.New(log, storage))
-	router.Put("/url", reassign_segments.New(log, storage))
-	router.Get("/url", get_segments.New(log, storage))
+	router.Post("/", add_segment.New(log, storage))
+	router.Delete("/", delete_segment.New(log, storage))
+	router.Put("/", reassign_segments.New(log, storage))
+	router.Get("/", get_segments.New(log, storage))
 	// TODO: run server
 	log.Info("starting server", slog.String("address", cfg.Address))
 	srv := &http.Server{
