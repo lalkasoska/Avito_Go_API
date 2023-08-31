@@ -232,17 +232,15 @@ func (s *Storage) GetUserHistory(userId int64, year int, month time.Month) error
 	defer rows.Close()
 
 	filename := "latest_segment_history_report.csv"
-	// Создание CSV файла
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Запись заголовков в CSV
 	fmt.Fprintln(file, "идентификатор пользователя;сегмент;операция;дата и время")
 
-	// Запись данных в CSV
 	for rows.Next() {
 		var userID int
 		var segmentName string

@@ -4,7 +4,7 @@ services:
   web:
     build: .
     env_file:
-      - local.env
+      - .env
     ports:
       - "8080:8080"
     volumes:
@@ -17,7 +17,7 @@ services:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_USERPASSWORD}
     ports:
-      - "5432:5432"  # You can change the host port if needed.
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 volumes:

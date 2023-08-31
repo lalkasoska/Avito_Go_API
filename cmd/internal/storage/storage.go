@@ -2,7 +2,6 @@ package storage
 
 import "errors"
 
-// TODO: Refactor error handling
 var (
 	ErrSegmentNotFound = errors.New("url not found")
 	ErrSegmentExists   = errors.New("url exists")

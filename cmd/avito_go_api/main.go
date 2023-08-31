@@ -41,7 +41,7 @@ func main() {
 	router.Get("/", get_segments.New(log, storage))
 	router.Get("/get_history", get_user_history.New(log, storage, *cfg))
 	router.Get("/report", func(w http.ResponseWriter, r *http.Request) {
-		filePath := "latest_segment_history_report.csv" // Replace with the actual file path
+		filePath := "latest_segment_history_report.csv"
 		http.ServeFile(w, r, filePath)
 
 	})
