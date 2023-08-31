@@ -39,10 +39,22 @@ func New(log *slog.Logger, segmentAssigner SegmentAssigner) http.HandlerFunc {
 		}
 
 		log.Info("request body decoded", slog.Any("request", req))
+
+		if len(req.SegmentsToRemove) == 0 && len(req.SegmentsToAdd) == 0 {
+			log.Error("no segments were given")
+			render.JSON(w, r, response.Error("no segments were given"))
+			return
+		}
+
 		err = segmentAssigner.ReassignSegments(req.SegmentsToAdd, req.SegmentsToRemove, req.UserId)
 		if errors.Is(err, storage.ErrUserHasSegment) {
 			log.Info("user already has some of the segments", slog.String("segmentsToAdd", strings.Join(req.SegmentsToAdd, ",")))
 			render.JSON(w, r, response.Error("user already has some of the segments"))
+			return
+		}
+		if errors.Is(err, storage.ErrUserNotFound) {
+			log.Info("user not found", slog.Int64("userId", req.UserId))
+			render.JSON(w, r, response.Error("user not found"))
 			return
 		}
 		if err != nil {

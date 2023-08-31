@@ -5,6 +5,7 @@ import (
 	"avito_go_api/cmd/internal/http-server/handlers/add_segment"
 	"avito_go_api/cmd/internal/http-server/handlers/delete_segment"
 	"avito_go_api/cmd/internal/http-server/handlers/get_segments"
+	"avito_go_api/cmd/internal/http-server/handlers/get_user_history"
 	"avito_go_api/cmd/internal/http-server/handlers/reassign_segments"
 	mwLogger "avito_go_api/cmd/internal/http-server/middleware/logger"
 	"avito_go_api/cmd/internal/lib/logger/sl"
@@ -19,53 +20,18 @@ import (
 func main() {
 
 	cfg := config.MustLoad()
-	//fmt.Println(cfg)
 
 	log := setupLogger(cfg.Env)
 	log.Info("Starting...", slog.String("env", cfg.Env))
-	log.Debug("DEBUGGING@!!!")
 
 	storage, err := postgresql.New(cfg.StoragePath)
 	if err != nil {
 		log.Error("failed to init storage", sl.Err(err))
 		os.Exit(1)
 	}
-	//err = storage.CreateSegment("SEGMENT_32722")
-	//if err != nil {
-	//	log.Error("failed to add segment", sl.Err(err))
-	//	os.Exit(1)
-	//
-	//}
-	//
-	err = storage.DeleteSegment("SEGMENT_27")
-	if err != nil {
-		log.Error("failed to init storage", sl.Err(err))
-		os.Exit(1)
-	}
-	_ = storage
-	//
-	//err = storage.DeleteSegment("SEGMENT_1")
-	//if err != nil {
-	//	log.Error("failed to delete segment", sl.Err(err))
-	//	os.Exit(1)
-	//
-	//}
-	//err = storage.ReassignSegments([]string{"SEGMENT_2", "SEGMENT_272", "SEGMENT_2722"}, []string{}, 1)
-	//if err != nil {
-	//	log.Error("failed to init storage", sl.Err(err))
-	//	os.Exit(1)
-	//}
-	//segments, err := storage.GetSegments(1)
-	//if err != nil {
-	//	log.Error("failed to get segments", sl.Err(err))
-	//	os.Exit(1)
-	//}
-	//fmt.Print(segments)
-	// TODO: init router: chi, chi render
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
-	//router.Use(middleware.Logger)
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
@@ -73,7 +39,13 @@ func main() {
 	router.Delete("/", delete_segment.New(log, storage))
 	router.Put("/", reassign_segments.New(log, storage))
 	router.Get("/", get_segments.New(log, storage))
-	// TODO: run server
+	router.Get("/get_history", get_user_history.New(log, storage, *cfg))
+	router.Get("/report", func(w http.ResponseWriter, r *http.Request) {
+		filePath := "latest_segment_history_report.csv" // Replace with the actual file path
+		http.ServeFile(w, r, filePath)
+
+	})
+
 	log.Info("starting server", slog.String("address", cfg.Address))
 	srv := &http.Server{
 		Addr:         cfg.Address,
@@ -82,11 +54,9 @@ func main() {
 		WriteTimeout: cfg.HTTPServer.Timeout,
 		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
-
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error("failed to start server")
 	}
-
 	log.Error("server stopped")
 }
 
