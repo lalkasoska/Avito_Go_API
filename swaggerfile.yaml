@@ -1,0 +1,164 @@
+swagger: "2.0"
+info:
+  title: "Avito Go API"
+  description: "API for managing segments, user history, and more"
+  version: "1.0.0"
+host: "localhost:8080"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /:
+    post:
+      summary: "Add a new segment"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: "Segment data"
+          required: true
+          schema:
+            $ref: "#/definitions/AddSegmentRequest"
+      responses:
+        200:
+          description: "Segment added successfully"
+    delete:
+      summary: "Delete a segment"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: "Segment ID"
+          required: true
+          schema:
+            $ref: "#/definitions/DeleteSegmentRequest"
+      responses:
+        200:
+          description: "Segment deleted successfully"
+    put:
+      summary: "Reassign segments"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: "Segment reassignment data"
+          required: true
+          schema:
+            $ref: "#/definitions/ReassignSegmentsRequest"
+      responses:
+        200:
+          description: "Segments reassigned successfully"
+    get:
+      summary: "Get segments"
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: "User ID"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Segments retrieved successfully"
+          schema:
+            $ref: "#/definitions/GetSegmentsResponse"
+
+  /get_history:
+    get:
+      summary: "Get user history"
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: "User ID"
+          required: true
+          type: integer
+        - name: year
+          in: query
+          description: "Year"
+          required: true
+          type: integer
+        - name: month
+          in: query
+          description: "Month"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "User history retrieved successfully"
+          schema:
+            $ref: "#/definitions/GetUserHistoryResponse"
+
+  /report:
+    get:
+      summary: "Get the latest segment history report"
+      produces:
+        - application/csv
+      responses:
+        200:
+          description: "Report retrieved successfully"
+
+definitions:
+  AddSegmentRequest:
+    type: object
+    properties:
+      name:
+        type: string
+
+  DeleteSegmentRequest:
+    type: object
+    properties:
+      name:
+        type: string
+
+  ReassignSegmentsRequest:
+    type: object
+    properties:
+      segmentsToAdd:
+        type: array
+        items:
+          type: string
+      segmentsToRemove:
+        type: array
+        items:
+          type: string
+      userId:
+        type: integer
+
+  GetSegmentsResponse:
+    type: object
+    properties:
+      response:
+        $ref: "#/definitions/ApiResponse"
+      segments:
+        type: array
+        items:
+          type: string
+
+  GetUserHistoryResponse:
+    type: object
+    properties:
+      response:
+        $ref: "#/definitions/ApiResponse"
+      link:
+        type: string
+
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
