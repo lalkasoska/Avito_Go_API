@@ -1,6 +1,6 @@
-# Avito Go API
+# Simple Go API
 
-An API for managing segments, user history, and more.
+An API for managing users' marketing segments
 
 ## Table of Contents
 
